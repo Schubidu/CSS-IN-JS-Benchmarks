@@ -9,6 +9,8 @@
   "license": "MIT",
   "dependencies": {
     "benchmarks-utils": "1.0.0",
+    "react": "15",
+    "react-dom": "15",
     "rockey-react": "=0.0.14"
   },
   "devDependencies": {
@@ -16,9 +18,8 @@
   },
   "benchmarks": {
     "name": "rockey-inline",
-    "useInlineStyles": false,
-    "useCSS": true,
     "useInlineStyles": true,
+    "useCSS": true,
     "link": "https://github.com/tuchk4/rockey"
   }
 }

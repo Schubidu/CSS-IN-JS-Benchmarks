@@ -8,12 +8,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "benchmarks-utils": "1.0.0",
     "@arr/foreach": "^0.1.0",
     "@arr/map": "^0.1.0",
-    "emotion": "^8.0.12",
-    "babel-plugin-emotion": "^8.0.12",
-    "react-emotion": "^8.0.12"
+    "@emotion/styled": "^10.0.5",
+    "babel-plugin-emotion": "^10.0.5",
+    "benchmarks-utils": "1.0.0",
+    "emotion": "^10.0.5"
   },
   "devDependencies": {
     "dev-tasks": "1.0.0"

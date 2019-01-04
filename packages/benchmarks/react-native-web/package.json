@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "devServer --package c",
-    "build": "devBuild --package react-native-web"
+    "__start": "devServer --package react-native-web",
+    "__build": "devBuild --package react-native-web"
   },
   "license": "MIT",
   "dependencies": {
     "benchmarks-utils": "1.0.0",
-    "react-native-web": "0.1.14",
-    "react": "^16.1.1",
-    "react-dom": "^16.1.1"
+    "react-art": "^16.7.0",
+    "react-native-web": "0.9.13"
   },
   "devDependencies": {
     "dev-tasks": "1.0.0"

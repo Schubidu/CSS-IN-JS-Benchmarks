@@ -8,8 +8,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "benchmarks-utils": "1.0.0",
-    "aphrodite": "1.2.0"
+    "aphrodite": "1.2.5",
+    "benchmarks-utils": "1.0.0"
   },
   "devDependencies": {
     "dev-tasks": "1.0.0"

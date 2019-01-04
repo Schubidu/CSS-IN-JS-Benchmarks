@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "benchmarks-utils": "1.0.0",
-    "styled-jss": "0.6.3",
-    "jss": "7.1.1"
+    "jss": "7.1.1",
+    "react": "15",
+    "react-dom": "15",
+    "styled-jss": "0.6.3"
   },
   "benchmarks": {
     "name": "styled-jss-w-o-plugins",

@@ -2,15 +2,15 @@
   "name": "table-styltron-big-table",
   "version": "1.0.0",
   "scripts": {
-    "start": "devServer --package styletron",
-    "build": "devBuild --package styletron"
+    "__start": "devServer --package styletron",
+    "__build": "devBuild --package styletron"
   },
   "license": "MIT",
   "dependencies": {
     "benchmarks-utils": "1.0.0",
-    "rockey-react": "0.0.11",
-    "styletron-client": "2.5.1",
-    "styletron-react": "2.5.3"
+    "styletron-client": "3.0.4",
+    "styletron-engine-atomic": "^1.0.13",
+    "styletron-react": "4.4.4"
   },
   "devDependencies": {
     "dev-tasks": "1.0.0"

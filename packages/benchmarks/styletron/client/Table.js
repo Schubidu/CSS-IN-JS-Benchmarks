@@ -1,6 +1,6 @@
 import React from 'react';
-import { styled, StyletronProvider } from 'styletron-react';
-import Styletron from 'styletron-client';
+import { styled, Provider } from 'styletron-react';
+import { Client as Styletron } from 'styletron-engine-atomic';
 
 const Table = styled('div', {
   display: 'table',
@@ -22,7 +22,9 @@ const TableComponent = ({ table, toPercent }) => (
     {table.map((row, i) => (
       <Row key={i}>
         {row.map((x, j) => (
-          <Cell key={`${i}${j}`} value={x}>{toPercent(x)}</Cell>
+          <Cell key={`${i}${j}`} value={x}>
+            {toPercent(x)}
+          </Cell>
         ))}
       </Row>
     ))}
@@ -32,10 +34,10 @@ const TableComponent = ({ table, toPercent }) => (
 const styleSheet = document.createElement('style');
 document.head.appendChild(styleSheet);
 
-const styletron = new Styletron([styleSheet]);
+const engine = new Styletron([styleSheet]);
 
 export default ({ table, toPercent }) => (
-  <StyletronProvider styletron={styletron}>
+  <Provider styletron={engine}>
     <TableComponent table={table} toPercent={toPercent} />
-  </StyletronProvider>
+  </Provider>
 );

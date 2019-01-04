@@ -8,8 +8,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "benchmarks-utils": "1.0.0",
-    "@threepointone/glam": "1.0.6"
+    "@threepointone/glam": "1.1.0",
+    "benchmarks-utils": "1.0.0"
   },
   "devDependencies": {
     "dev-tasks": "1.0.0"

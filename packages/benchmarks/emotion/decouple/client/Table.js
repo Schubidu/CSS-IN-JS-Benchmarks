@@ -1,5 +1,7 @@
+/** @jsx jsx */
+import { css, jsx } from '@emotion/core';
 import React from 'react';
-import styled, { css } from 'react-emotion';
+import styled from '@emotion/styled';
 
 const Table = styled('div')`
   display: table;
@@ -24,7 +26,9 @@ export default ({ table, toPercent }) => (
     {table.map((row, i) => (
       <Row key={i}>
         {row.map((x, j) => (
-          <Cell key={`${i}${j}`} value={x}>{toPercent(x)}</Cell>
+          <Cell key={`${i}${j}`} value={x}>
+            {toPercent(x)}
+          </Cell>
         ))}
       </Row>
     ))}

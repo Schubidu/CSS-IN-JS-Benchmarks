@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "devServer --package radium",
-    "build": "devBuild --package radium"
+    "__start": "devServer --package radium",
+    "__build": "devBuild --package radium"
   },
   "license": "MIT",
   "dependencies": {
     "benchmarks-utils": "1.0.0",
-    "radium": "0.18.2"
+    "radium": "0.25.1"
   },
   "devDependencies": {
     "dev-tasks": "1.0.0"

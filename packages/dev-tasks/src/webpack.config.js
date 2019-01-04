@@ -1,43 +1,45 @@
 const webpack = require('webpack');
 const path = require('path');
 const chalk = require('chalk');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const merge = require('webpack-merge');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const { argv } = require('yargs');
 const packageName = argv.package;
 
-const sourcePath = path.join(
-  __dirname,
-  '..',
-  '..',
-  'benchmarks',
-  packageName,
-  './client'
-);
-const staticsPath = path.join(
-  __dirname,
-  '..',
-  '..',
-  'benchmarks',
-  packageName,
-  './static'
-);
+const packagePath = path.join(__dirname, '../../benchmarks', packageName);
+
+const sourcePath = path.join(packagePath, './client');
+const staticsPath = path.join(packagePath, './static');
+
+let packageWebpackConfig = undefined;
+try {
+  packageWebpackConfig = require(path.join(packagePath, './webpack.config.js'));
+  console.log('found custom webpack config for package');
+  if (typeof packageWebpackConfig !== 'function') {
+    console.error('custom webpack config for package must exports a function!');
+    process.exit(1);
+  }
+} catch (e) {}
 
 const isProd = process.NODE_ENV === 'production';
 console.log(
-  `webpack build with env ${isProd ? chalk.green('production') : chalk.green('development')}`
+  `webpack build with env ${
+    isProd ? chalk.green('production') : chalk.green('development')
+  }`
 );
 
 const plugins = [
-  new webpack.optimize.CommonsChunkPlugin({
-    name: 'vendor',
-    minChunks: Infinity,
-    filename: 'vendor.bundle.js',
-  }),
   new webpack.EnvironmentPlugin({
     NODE_ENV: process.NODE_ENV,
   }),
   new webpack.NamedModulesPlugin(),
+  new HtmlWebpackPlugin({
+    title: packageName,
+    template: path.resolve(__dirname, '../template/index.html'),
+  }),
 ];
 
 if (isProd) {
@@ -46,73 +48,76 @@ if (isProd) {
       minimize: true,
       debug: false,
     }),
-    new ExtractTextPlugin('styles.css'),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false,
-        screw_ie8: true,
-        conditionals: true,
-        unused: true,
-        comparisons: true,
-        sequences: true,
-        dead_code: true,
-        evaluate: true,
-        if_return: true,
-        join_vars: true,
-      },
-      output: {
-        comments: false,
-      },
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: !isProd ? '[name].css' : '[name].[hash].css',
+      chunkFilename: !isProd ? '[id].css' : '[id].[hash].css',
     })
   );
 } else {
   plugins.push(new webpack.HotModuleReplacementPlugin());
 }
 
-module.exports = {
+const ruleJs = /\.(js|jsx)$/;
+const isRuleJs = test => test.source === ruleJs.source;
+
+const ruleCss = /\.css$/;
+const isRuleCss = test => test.source === ruleCss.source;
+
+let config = {
   devtool: isProd ? 'source-map' : 'eval',
   context: sourcePath,
   entry: {
     js: './index.js',
-    vendor: ['react'],
+    vendor: ['react', 'react-dom', 'benchmarks-utils'],
   },
   output: {
     path: staticsPath,
     filename: '[name].bundle.js',
   },
+  optimization: !isProd
+    ? undefined
+    : {
+        splitChunks: {
+          // include all types of chunks
+          chunks: 'all',
+        },
+        minimizer: [
+          new UglifyJsPlugin({
+            uglifyOptions: {
+              warnings: false,
+              screw_ie8: true,
+              conditionals: true,
+              unused: true,
+              comparisons: true,
+              sequences: true,
+              dead_code: true,
+              evaluate: true,
+              if_return: true,
+              join_vars: true,
+            },
+          }),
+        ],
+      },
   module: {
     rules: [
       {
-        test: /\.html$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'file-loader',
-          query: {
-            name: '[name].[ext]',
-          },
-        },
-      },
-      {
-        test: /\.(js|jsx)$/,
+        test: ruleJs,
         include: sourcePath,
         exclude: /node_modules/,
         use: ['babel-loader'],
       },
       {
-        test: /\.css$/,
+        test: ruleCss,
         exclude: /node_modules/,
-        use: isProd
-          ? ExtractTextPlugin.extract({
-              fallback: 'style-loader',
-              use: { loader: 'css-loader', options: { sourceMap: true } },
-            })
-          : [
-              'style-loader',
-              {
-                loader: 'css-loader',
-                options: { sourceMap: true },
-              },
-            ],
+        use: [
+          !isProd ? 'style-loader' : MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: { sourceMap: true },
+          },
+        ],
       },
     ],
   },
@@ -160,6 +165,7 @@ module.exports = {
     compress: isProd,
     inline: !isProd,
     hot: !isProd,
+    watchContentBase: true,
     stats: {
       assets: true,
       children: false,
@@ -176,3 +182,10 @@ module.exports = {
     },
   },
 };
+
+if (packageWebpackConfig) {
+  packageWebpackConfig({ config, merge, isProd, isRuleCss, isRuleJs }).module
+    .rules;
+}
+
+module.exports = config;

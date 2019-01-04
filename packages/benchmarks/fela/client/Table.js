@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRenderer } from 'fela';
-import { Provider, createComponent } from 'react-fela';
+import { RendererProvider, createComponent } from 'react-fela';
 
 const Table = createComponent(props => ({
   display: 'table',
@@ -22,15 +22,17 @@ const mountNode = document.createElement('style');
 document.head.appendChild(mountNode);
 
 export default ({ table, toPercent }) => (
-  <Provider renderer={renderer} mountNode={mountNode}>
+  <RendererProvider renderer={renderer} mountNode={mountNode}>
     <Table>
       {table.map((row, i) => (
         <Row key={i}>
           {row.map((x, j) => (
-            <Cell key={`${i}${j}`} value={x}>{toPercent(x)}</Cell>
+            <Cell key={`${i}${j}`} value={x}>
+              {toPercent(x)}
+            </Cell>
           ))}
         </Row>
       ))}
     </Table>
-  </Provider>
+  </RendererProvider>
 );

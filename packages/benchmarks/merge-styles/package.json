@@ -8,8 +8,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "benchmarks-utils": "1.0.0",
-    "@uifabric/merge-styles": "5.12.2"
+    "@uifabric/merge-styles": "5.12.2",
+    "benchmarks-utils": "1.0.0"
   },
   "devDependencies": {
     "dev-tasks": "1.0.0"

@@ -9,7 +9,9 @@
   "license": "MIT",
   "dependencies": {
     "benchmarks-utils": "1.0.0",
-    "rockey-react": "=0.0.14"
+    "react": "15",
+    "react-dom": "15",
+    "rockey-react": "0.0.14"
   },
   "devDependencies": {
     "dev-tasks": "1.0.0"

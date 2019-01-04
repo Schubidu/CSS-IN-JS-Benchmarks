@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "benchmarks-utils": "1.0.0",
+    "react": "15",
+    "react-dom": "15",
     "styled-jss": "0.6.3"
   },
   "benchmarks": {

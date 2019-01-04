@@ -1,17 +1,22 @@
 {
   "plugins": [
-    "transform-class-properties",
-    ["styled-jsx/babel", { "optimizeForSpeed": true }]
+    "@babel/plugin-proposal-class-properties",
+    [
+      "styled-jsx/babel",
+      {
+        "optimizeForSpeed": true
+      }
+    ]
   ],
   "presets": [
-    ["es2015", { "modules": false }],
-    "react"
+    [
+      "@babel/preset-env",
+      {
+        "modules": false
+      }
+    ],
+    "@babel/preset-react"
   ],
   "env": {
-    "development": {
-      "presets": [
-        "react-hmre"
-      ]
-    }
   }
 }

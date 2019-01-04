@@ -3,7 +3,7 @@ import cxs from 'cxs';
 
 const cxsTable = cxs({
   display: 'table',
-  marginTop: 10,
+  marginTop: '10px',
 });
 
 const cxsRow = cxs({
@@ -12,7 +12,7 @@ const cxsRow = cxs({
 
 const cxsCell = cxs({
   display: 'table-cell',
-  padding: 10,
+  padding: '10px',
 });
 
 const Table = ({ table, toPercent }) => (

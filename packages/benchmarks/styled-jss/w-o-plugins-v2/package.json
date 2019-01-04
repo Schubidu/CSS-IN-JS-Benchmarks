@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "benchmarks-utils": "1.0.0",
-    "styled-jss": "2.1.1",
-    "jss": "9.1.0"
+    "jss": "9.1.0",
+    "styled-jss": "2.1.1"
   },
   "benchmarks": {
     "name": "styled-jss-w-o-plugins-v2",
