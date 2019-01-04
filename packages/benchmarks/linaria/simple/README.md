@@ -1,4 +1,4 @@
-# React Big Table
+# linaria Big Table
 
 ## Available Scripts
 

@@ -1,0 +1,22 @@
+{
+  "name": "table-linaria-inline-styles",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "devServer --package linaria/inline-styles",
+    "build": "devBuild --package linaria/inline-styles"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "linaria": "1.0.0-beta.2",
+    "benchmarks-utils": "1.0.0"
+  },
+  "devDependencies": {
+    "dev-tasks": "1.0.0"
+  },
+  "benchmarks": {
+    "name": "linaria-inline-styles",
+    "useCSS": true,
+    "link": "https://linaria.now.sh/"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "table-linaria-simple",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "devServer --package linaria/simple",
+    "build": "devBuild --package linaria/simple"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "linaria": "1.0.0-beta.2",
+    "benchmarks-utils": "1.0.0"
+  },
+  "devDependencies": {
+    "dev-tasks": "1.0.0"
+  },
+  "benchmarks": {
+    "name": "linaria-simple",
+    "useCSS": true,
+    "link": "https://linaria.now.sh/"
+  }
+}

@@ -1,4 +1,4 @@
-# Glamourous Big Table
+# linaria Big Table
 
 ## Available Scripts
 
