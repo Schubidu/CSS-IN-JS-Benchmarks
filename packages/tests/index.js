@@ -1,18 +1,16 @@
 const connect = require('connect');
-const serveStatic = require('serve-static');
-
+const serveHandler = require('serve-handler');
 const shell = require('shelljs');
 const chalk = require('chalk');
+const glob = require('glob');
 
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const { argv } = require('yargs');
 
-const Lighthouse = require('lighthouse');
-const {
-  ChromeLauncher,
-} = require('lighthouse/lighthouse-cli/chrome-launcher.js');
+const lighthouse = require('lighthouse');
+const chromeLauncher = require('chrome-launcher');
 
 const packageJson = 'package.json';
 
@@ -20,46 +18,43 @@ const filterPackages = argv._.length ? argv._ : null;
 
 run();
 
-function launchChromeAndRunLighthouse(url, flags, config) {
-  const launcher = new ChromeLauncher({
-    port: 9222,
-    autoSelectChrome: true,
+function launchChromeAndRunLighthouse(url, flags = {}, config) {
+  return chromeLauncher.launch(flags).then(chrome => {
+    flags.port = chrome.port;
+    return lighthouse(url, flags, config).then(results =>
+      chrome.kill().then(() => results.lhr)
+    );
   });
-  return launcher
-    .isDebuggerReady()
-    .catch(() => {
-      if (flags.skipAutolaunch) {
-        return;
-      }
-      return launcher.run();
-    })
-    .then(() => Lighthouse(url, flags, config))
-    .then(results => launcher.kill().then(() => results))
-    .catch(err => {
-      return launcher.kill().then(() => {
-        throw err;
-      }, console.error);
-    });
 }
 
 function getPackageList() {
-  const lernaConfig = require('../../lerna.json');
+  const packageConfig = require('../../package.json');
 
-  return lernaConfig.packages
-    .filter(pckg => pckg.indexOf('packages/benchmarks/') === 0)
+  const packages = packageConfig.workspaces
+    .filter(wkspc => wkspc.startsWith('packages/benchmarks/'))
+    .map(wkspc => wkspc.replace('**/*', '**/package.json'))
+    .map(wkspc => path.resolve(__dirname, '..', '..', wkspc))
+    .reduce((filePathes, wkspc) => [].concat(filePathes, glob.sync(wkspc)), []);
+
+  return packages
     .map(pckg => {
       // NOTE: use NODE_PATH env variable to prevent .. .. ..
-      const { benchmarks } = require(path.join(
-        '..',
-        '..',
-        pckg,
-        'package.json'
-      ));
+      const { benchmarks, scripts } = require(pckg);
+
+      if (!scripts || (scripts && !scripts.build)) {
+        return undefined;
+      }
 
       return Object.assign({}, benchmarks, {
-        path: path.resolve(__dirname, '..', '..', pckg),
+        path: path.resolve(
+          __dirname,
+          '..',
+          '..',
+          pckg.replace('/package.json', '')
+        ),
       });
     })
+    .filter(info => Boolean(info) && Boolean(info.name))
     .filter(info => {
       return (
         !filterPackages ||
@@ -79,7 +74,6 @@ function getAverageValue(arr) {
 }
 
 async function runTestCase(url) {
-  const config = require('lighthouse/lighthouse-core/config/perf.json');
   const flags = { maxWaitForLoad: 60000, interactive: true };
 
   const mountDuration = [];
@@ -92,24 +86,23 @@ async function runTestCase(url) {
       const currentRes = await launchChromeAndRunLighthouse(
         `${url}&butch=${butch}`,
         flags,
-        config
+        { extends: 'lighthouse:default' }
       );
-      const values = currentRes.audits['user-timings'].extendedInfo.value;
-      const mountTime = values[2].duration;
-      mountTime && mountDuration.push(mountTime);
-      let curRerenderDuration = [];
-      for (let i = 3; i < values.length; i++) {
-        if (!values[i].duration) {
-          continue;
-        }
-        curRerenderDuration.push(values[i].duration);
-      }
-      if (curRerenderDuration.length) {
-        rerenderDuration.push(getAverageValue(curRerenderDuration));
-      } else if (butch) {
-        i--;
-        butch = false;
-      }
+
+      const measures = currentRes.audits['user-timings'].details.items.filter(
+        ({ timingType }) => timingType === 'Measure'
+      );
+
+      mountDuration.push(
+        ...measures
+          .filter(({ name }) => name === 'measureMount')
+          .map(({ duration }) => duration)
+      );
+      rerenderDuration.push(
+        ...measures
+          .filter(({ name }) => name.startsWith('measureRerender'))
+          .map(({ duration }) => duration)
+      );
     } catch (err) {
       console.log(err);
       i--;
@@ -211,33 +204,38 @@ async function run() {
   console.log('');
 
   for (let i = 0; i < packages.length; i++) {
-    const app = connect();
+    //for (let i = 15; i < 16; i++) {
     const packageInfo = packages[i];
     const currentPort = port + i;
 
     console.log('');
     console.log(
-      `  (${i + 1}/${packages.length}) ${chalk.green(packageInfo.name)} at port ${currentPort}`
+      `  (${i + 1}/${packages.length}) ${chalk.green(
+        packageInfo.name
+      )} at port ${currentPort}`
     );
     console.log('');
 
     if (!process.env.SKIP_BUILD) {
       console.log(`  ${chalk.cyan('prepre package build')}`);
       console.log('');
-      shell.exec(`npm --prefix ${packageInfo.path} run build`);
+      shell.exec(`yarn --cwd ${packageInfo.path} install --silent`);
+      shell.exec(`yarn --cwd ${packageInfo.path} run build`);
 
       console.log('');
       console.log(`  ${chalk.cyan('build completed')}`);
       console.log('');
     }
 
-    app.use(
-      serveStatic(path.join(packageInfo.path, 'static'), {
-        index: ['index.html'],
+    const server = http
+      .createServer((request, response) => {
+        return serveHandler(request, response, {
+          public: path.join(packageInfo.path, 'static'),
+          cleanUrls: true,
+        });
       })
-    );
+      .listen(currentPort);
 
-    const server = http.createServer(app).listen(currentPort);
     const url = `http://localhost:${currentPort}?test=true`;
 
     console.log(`  run tests...`);
@@ -256,7 +254,6 @@ async function run() {
       rerenderDuration: packageRes.rerenderDuration,
       mountDuration: packageRes.mountDuration,
     });
-
     server.close();
   }
 
